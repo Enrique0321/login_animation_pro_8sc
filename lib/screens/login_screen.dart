@@ -9,6 +9,17 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  //Cerebro de la logica de animaciones
+
+  StateMachineController? controller;
+
+  //State machine inputs
+  SMIBool? isChecking; //Oso chismoso
+  SMIBool? isHandsUp; //Se tapa los ojos
+  SMITrigger? trigSuccess; //Emociona
+  SMITrigger? trigFail; //Triste
+  SMINumber? numLook; // Ojos siguen el texto
+
   bool isPasswordVisible = false;
   @override
   Widget build(BuildContext context) {
@@ -16,65 +27,150 @@ class _LoginScreenState extends State<LoginScreen> {
     final Size size = MediaQuery.of(context).size;
     return Scaffold(
       body: SafeArea(
-        child: Column(
-          //Axis o eje vertical
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(
-              //Ancho de la pantalla calculado por MQ
-              width: size.width,
-              height: 200,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Column(
+            //Axis o eje vertical
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(
+                //Ancho de la pantalla calculado por MQ
+                width: size.width,
+                height: 200,
 
-              child: RiveAnimation.asset('animated_login_character.riv'),
-            ),
-            SizedBox(height: 10),
-            TextField(
-              decoration: InputDecoration(
-                hintText: 'Email',
-                prefixIcon: const Icon(Icons.mail),
-                border: OutlineInputBorder(
-                  //Bordes ciruclares
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-            SizedBox(height: 10),
+                child: RiveAnimation.asset(
+                  'animated_login_character.riv',
+                  stateMachines: ['Login Machine'],
+                  onInit: (artboard) {
+                    controller = StateMachineController.fromArtboard(
+                      artboard,
+                      'Login Machine',
+                    );
+                    if (controller == null) return;
 
-            TextField(
-              //Para que se oculte la contraseña
-              obscureText: !isPasswordVisible,
-
-              ///Nueva propiedad
-              decoration: InputDecoration(
-                hintText: "Password",
-                prefixIcon: const Icon(Icons.lock),
-                //Nuevo icono para mostrar u ocultar la contraseña
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      isPasswordVisible = !isPasswordVisible;
-                    });
+                    artboard.addController(controller!);
+                    isChecking = controller!.findSMI('isChecking');
+                    isHandsUp = controller!.findSMI('isHandsUp');
+                    trigSuccess = controller!.findSMI('trigSuccess');
+                    trigFail = controller!.findSMI('trigFail');
+                    numLook = controller!.findSMI('numLook');
                   },
                 ),
-                border: OutlineInputBorder(
-                  //Bordes ciruclares
-                  borderRadius: BorderRadius.circular(12),
+              ),
+              SizedBox(height: 10),
+
+              //Campo de texto email
+              TextField(
+                onChanged: (value) {
+                  if (isHandsUp != null) {
+                    //no subir las manos al escribir email
+                    isHandsUp!.change(false);
+                  }
+                  if (isChecking == null) return;
+                  isChecking!.change(true);
+
+                  if (numLook == null) return;
+                  //Ajustar el valor de numLook segun la longitud del texto
+                  double lookValue =
+                      (value.length.clamp(0, 80)) *
+                      1.5; // Ajusta el factor según tu animación
+                  numLook!.change(lookValue);
+                },
+                decoration: InputDecoration(
+                  hintText: 'Email',
+                  prefixIcon: const Icon(Icons.mail),
+                  border: OutlineInputBorder(
+                    //Bordes ciruclares
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 10),
-            SizedBox(
-              width: size.width,
-              child: const Text(
-                "Forgot your Password?",
-                textAlign: TextAlign.right,
-                style: TextStyle(decoration: TextDecoration.underline),
+              SizedBox(height: 10),
+
+              //Campo de texto password
+              TextField(
+                onChanged: (value) {
+                  if (isChecking != null) {
+                    //no subir las manos al escribir email
+                    isChecking!.change(false);
+                  }
+                  if (isHandsUp == null) return;
+                  isHandsUp!.change(true);
+                },
+                //Para que se oculte la contraseña
+                obscureText: !isPasswordVisible,
+
+                ///Nueva propiedad
+                decoration: InputDecoration(
+                  hintText: "Password",
+                  prefixIcon: const Icon(Icons.lock),
+                  //Nuevo icono para mostrar u ocultar la contraseña
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      isPasswordVisible
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        isPasswordVisible = !isPasswordVisible;
+                      });
+                    },
+                  ),
+                  border: OutlineInputBorder(
+                    //Bordes ciruclares
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
               ),
-            ),
-          ],
+              const SizedBox(height: 10),
+              SizedBox(
+                width: size.width,
+                child: const Text(
+                  "Forgot your Password?",
+                  textAlign: TextAlign.right,
+                  style: TextStyle(decoration: TextDecoration.underline),
+                ),
+              ),
+              SizedBox(height: 10),
+              MaterialButton(
+                minWidth: size.width,
+                height: 50,
+                color: Colors.blue,
+                //Formato del boton
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                onPressed: () {},
+                child: const Text(
+                  "Login",
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+              SizedBox(
+                width: size.width,
+                child: Row(
+                  //centrar el texto
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text("Don't have an account?"),
+                    TextButton(
+                      onPressed: () {},
+                      child: const Text(
+                        "Sign up",
+                        style: TextStyle(
+                          color: Colors.blue,
+                          //texto subrrayado
+                          fontWeight: FontWeight.bold,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
