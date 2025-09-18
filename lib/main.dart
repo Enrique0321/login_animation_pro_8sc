@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
   ///Anotación que indica que se está sobrescribiendo un método de la clase padre
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'oke',
       debugShowCheckedModeBanner:
           false, //Quita la etiqueta de debug dentro de la app
       theme: ThemeData(

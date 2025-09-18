@@ -2,6 +2,10 @@
 
 A new Flutter project.
 
+## 🚀 Demo de la animación
+
+![Demo de la app](/cat-dog-roblox-dance-el-gato-y-papu-perro-bailando.gif)
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.
